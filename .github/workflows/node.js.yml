@@ -42,8 +42,27 @@ jobs:
     - run: npm run build
       name: NPM Build
 
+    - name: Install GitVersion
+      run: |
+        wget https://github.com/GitTools/GitVersion/releases/download/5.7.0/gitversion-linux-5.7.0.tar.gz
+        tar -xzf gitversion-linux-5.7.0.tar.gz
+        sudo cp ./gitversion /usr/local/bin/gitversion
+
+    - name: Determine Version
+      id: gitversion
+      run: gitversion /output json /showvariable FullSemVer
+      
     - name: Build & Push image
       run: |
+        TAG=${{ steps.gitversion.outputs.FullSemVer }}
         docker login --username rdev2021 --password ${{ secrets.GH_PAT }} ghcr.io
-        docker build . --platform linux/amd64 --tag ghcr.io/rdev2021/blog-starter-app:latest
-        docker push ghcr.io/rdev2021/blog-starter-app:latest
+        docker build . --platform linux/amd64 --tag ghcr.io/rdev2021/blog-starter-app:$TAG
+        docker push ghcr.io/rdev2021/blog-starter-app:$TAG
+        
+    - name: Create Git Tag
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        TAG=${{ steps.gitversion.outputs.FullSemVer }}
+        git tag $TAG
+        git push origin $TAG        
