@@ -26,11 +26,11 @@ jobs:
         uses: gittools/actions/gitversion/setup@v3.0.0
         with:
           versionSpec: '6.x'
-          targetPath: "/home/runner/work/blog-starter-app/"
 
       - name: Determine Version
         id: version_step # step id used as reference for output values
         uses: gittools/actions/gitversion/execute@v3.0.0
+        targetPath: "/home/runner/work/blog-starter-app/"
 
       - run: |
           echo "FullSemVer (env.fullSemVer)            : ${{ env.fullSemVer }}"
