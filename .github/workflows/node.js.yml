@@ -56,4 +56,3 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         owner: rdev2021
-        tagName: 0.1.0
