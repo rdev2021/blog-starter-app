@@ -1,32 +1,7 @@
-mode: ContinuousDeployment
-next-version: 1.0.0
+workflow: GitFlow/v1
+mode: ManualDeployment
 branches:
   main:
-    tag: ''
-    increment: Patch
-    prevent-increment-of-merged-branch-version: true
-    track-merge-target: true
+    label: rc
   dev:
-    tag: 'alpha'
-    increment: Minor
-    prevent-increment-of-merged-branch-version: true
-    track-merge-target: false
-  feature:
-    tag: 'feat'
-    increment: Inherit
-    prevent-increment-of-merged-branch-version: false
-  release:
-    tag: 'rc'
-    increment: None
-    prevent-increment-of-merged-branch-version: true
-  hotfix:
-    tag: 'hotfix'
-    increment: Patch
-    prevent-increment-of-merged-branch-version: false
-  support:
-    tag: 'support'
-    increment: Patch
-    prevent-increment-of-merged-branch-version: false
-ignore:
-  sha: []
-merge-message-formats: {}
+    label: beta
