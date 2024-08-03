@@ -56,3 +56,4 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         owner: rdev2021
+        repository: 'blog-starter-app'
