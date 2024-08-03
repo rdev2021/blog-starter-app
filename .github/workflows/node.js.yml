@@ -10,15 +10,9 @@ on:
     branches: [ "main", "dev" ]
 
 jobs:
-  build:
-
+  GitVersion_v6_same_job:
+    name: GitVersion v6 (same job)
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
