@@ -43,10 +43,9 @@ jobs:
       name: NPM Build
 
     - name: Install GitVersion
-      run: |
-        wget https://github.com/GitTools/GitVersion/releases/download/5.7.0/gitversion-linux-5.7.0.tar.gz
-        tar -xzf gitversion-linux-5.7.0.tar.gz
-        sudo cp ./gitversion /usr/local/bin/gitversion
+      uses: gittools/actions/gitversion/setup@v3.0.0
+      with:
+      versionSpec: '6.0.0'
 
     - name: Determine Version
       id: gitversion
