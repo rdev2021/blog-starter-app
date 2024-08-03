@@ -10,80 +10,46 @@ on:
     branches: [ "main", "dev" ]
 
 jobs:
-  GitVersion_v6_same_job:
-    name: GitVersion v6 (same job)
+  build:
+
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+        
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - run: npm install
+      name: NPM Install
+        
+    - run: npm run build
+      name: NPM Build
+        
+    - name: Bump version and push tag
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        npm version patch
+        git push origin main --tags
 
-      - name: List repository files
-        run: ls -R
-
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v3.0.0
-        with:
-          versionSpec: '6.x'
-
-      - name: Determine Version
-        id: version_step # step id used as reference for output values
-        uses: gittools/actions/gitversion/execute@v3.0.0
-        targetPath: "/home/runner/work/blog-starter-app/"
-
-      - run: |
-          echo "FullSemVer (env.fullSemVer)            : ${{ env.fullSemVer }}"
-        name: Display GitVersion variables (without prefix)
-
-      - run: |
-          echo "FullSemVer (env.GitVersion_FullSemVer) : ${{ env.GitVersion_FullSemVer }}"
-        name: Display GitVersion variables (with prefix)
-
-      - run: |
-          echo "FullSemVer (steps.version_step.outputs.fullSemVer)            : ${{ steps.version_step.outputs.fullSemVer }}"
-        name: Display GitVersion outputs (step output without prefix)
-
-      - run: |
-          echo "FullSemVer (steps.version_step.outputs.GitVersion_FullSemVer) : ${{ steps.version_step.outputs.GitVersion_FullSemVer }}"
-        name: Display GitVersion outputs (step output with prefix)
-
-      - run: |
-          echo "FullSemVer (env.myvar_fullSemVer)            : ${{ env.myvar_fullSemVer }}"
-        name: Display mapped local env (outputs without prefix)
-        env:
-          myvar_fullSemVer: ${{ steps.version_step.outputs.fullSemVer }}
-
-      - run: |
-          echo "FullSemVer (env.myvar_GitVersion_FullSemVer) : ${{ env.myvar_GitVersion_FullSemVer }}"
-        name: Display mapped local env (outputs with prefix)
-        env:
-          myvar_GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
-
-      - run: |
-          echo "FullSemVer (env.myvar_fullSemVer)            : $env:myvar_fullSemVer"
-        name: Display mapped local env (pwsh - outputs without prefix)
-        shell: pwsh
-        env:
-          myvar_fullSemVer: ${{ steps.version_step.outputs.fullSemVer }}
-
-      - run: |
-          echo "FullSemVer (env.myvar_GitVersion_FullSemVer) : $env:myvar_GitVersion_FullSemVer"
-        name: Display mapped local env (pwsh - outputs with prefix)
-        shell: pwsh
-        env:
-          myvar_GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
-
-      - run: |
-          echo "FullSemVer (myvar_fullSemVer)            : $myvar_fullSemVer"
-        name: Display mapped local env (bash - outputs without prefix)
-        shell: bash
-        env:
-          myvar_fullSemVer: ${{ steps.version_step.outputs.fullSemVer }}
-
-      - run: |
-          echo "FullSemVer (myvar_GitVersion_FullSemVer) : $myvar_GitVersion_FullSemVer"
-        name: Display mapped local env (bash - outputs with prefix)
-        shell: bash
-        env:
-          myvar_GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
+    - name: Publish to npm
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npm publish
