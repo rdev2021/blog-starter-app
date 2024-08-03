@@ -48,21 +48,7 @@ jobs:
         versionSpec: '6.0.0'
 
     - name: Determine Version
+      id: gitversion
       uses: gittools/actions/gitversion/execute@v3.0.0
       with:
-        useConfigFile: true
-        
-    - name: Build & Push image
-      run: |
-        TAG=${{ steps.gitversion.outputs.GitVersion_FullSemVer }}
-        docker login --username rdev2021 --password ${{ secrets.GH_PAT }} ghcr.io
-        docker build . --platform linux/amd64 --tag ghcr.io/rdev2021/blog-starter-app:$TAG
-        docker push ghcr.io/rdev2021/blog-starter-app:$TAG
-        
-    - name: Create Git Tag
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        TAG=${{ steps.gitversion.outputs.GitVersion_FullSemVer }}
-        git tag $TAG
-        git push origin $TAG        
+        configFilePath: GitVersion.yml
