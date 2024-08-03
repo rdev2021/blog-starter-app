@@ -18,6 +18,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          
+      - name: List repository files
+        run: ls -R
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v3.0.0
