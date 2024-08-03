@@ -42,14 +42,14 @@ jobs:
     - run: npm run build
       name: NPM Build
         
-    - name: Bump version and push tag
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Bump version and get new version
+      id: bump_version
       run: |
-        npm version patch
-        git push origin main --tags
+        NEW_VERSION=$(npm version patch | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+        echo "new_version=$NEW_VERSION" >> $GITHUB_ENV
 
-    - name: Publish to npm
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: npm publish
+    - name: Build & Push image
+      run: |
+        docker login --username rdev2021 --password ${{ secrets.GH_PAT }} ghcr.io
+        docker build . --platform linux/amd64 --tag ghcr.io/rdev2021/blog-starter-app:$new_version
+        docker push ghcr.io/rdev2021/blog-starter-app:$new_version
