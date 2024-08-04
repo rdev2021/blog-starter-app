@@ -1,7 +1,10 @@
-workflow: GitFlow/v1
-mode: ManualDeployment
+mode: Mainline
 branches:
   main:
-    label: rc
+    regex: ^latest$
+  pull-request:
+    tag: pr
   dev:
-    label: beta
+    regex: ^latest$
+  pull-request:
+    tag: pr
