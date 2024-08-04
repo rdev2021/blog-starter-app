@@ -41,28 +41,15 @@ jobs:
         
     - run: npm run build
       name: NPM Build
-
-    - name: Install GitVersion
+        
+    - name: Bump version and get new version
+      id: bump_version
       run: |
-        wget https://github.com/GitTools/GitVersion/releases/download/5.7.0/gitversion-linux-5.7.0.tar.gz
-        tar -xzf gitversion-linux-5.7.0.tar.gz
-        sudo cp ./gitversion /usr/local/bin/gitversion
+        NEW_VERSION=$(npm version patch | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+        echo "new_version=$NEW_VERSION" >> $GITHUB_ENV
 
-    - name: Determine Version
-      id: gitversion
-      run: gitversion /output json /showvariable FullSemVer
-      
     - name: Build & Push image
       run: |
-        TAG=${{ steps.gitversion.outputs.FullSemVer }}
         docker login --username rdev2021 --password ${{ secrets.GH_PAT }} ghcr.io
-        docker build . --platform linux/amd64 --tag ghcr.io/rdev2021/blog-starter-app:$TAG
-        docker push ghcr.io/rdev2021/blog-starter-app:$TAG
-        
-    - name: Create Git Tag
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        TAG=${{ steps.gitversion.outputs.FullSemVer }}
-        git tag $TAG
-        git push origin $TAG        
+        docker build . --platform linux/amd64 --tag ghcr.io/rdev2021/blog-starter-app:$new_version
+        docker push ghcr.io/rdev2021/blog-starter-app:$new_version
